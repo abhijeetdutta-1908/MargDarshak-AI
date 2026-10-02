@@ -9,9 +9,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY backend/ /srv/backend/
 COPY database/ /srv/database/
+COPY ml/ /srv/ml/
 
 RUN useradd --create-home appuser
 USER appuser
 
 EXPOSE 8000
-CMD ["sh", "-c", "alembic upgrade head && exec uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+CMD ["sh", "-c", "alembic upgrade head && python ../database/seed.py && exec uvicorn app.main:app --host 0.0.0.0 --port 8000"]

@@ -41,7 +41,7 @@ preferences → RecommendationEngine (FAISS candidates → weighted score + reas
 |---|-------|-------------|--------|
 | 1 | Setup | Repo layout, FastAPI + React + Postgres, Docker Compose, health check end to end | ✅ done |
 | 2 | Auth & models | All SQLAlchemy models, Alembic migrations, register/login/JWT/me, preferences API, login/register/profile UI | ✅ done |
-| 3 | Data | Seed script: 30+ destinations, 100+ hotels, 100+ attractions, 50+ restaurants | |
+| 3 | Data | 36 destinations, 153 attractions, 68 restaurants, 72 activities/shopping, 180 sample hotels; idempotent seed; destinations + hotels API | ✅ done |
 | 4 | Recommendations | Sentence-Transformer embeddings (TF-IDF fallback), FAISS index, weighted scoring + reasons | |
 | 5 | External APIs | Weather, Maps, Places services with cache, timeouts, fallbacks | |
 | 6 | Budget & routes | `BudgetCalculator`, `RouteOptimizer` | |

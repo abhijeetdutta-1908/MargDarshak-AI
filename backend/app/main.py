@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.database import get_db
-from app.routers import auth, users
+from app.routers import auth, catalog, users
 
 log = logging.getLogger("margdarshak")
 
@@ -29,6 +29,7 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(users.router)
+app.include_router(catalog.router)
 
 
 @app.exception_handler(SQLAlchemyError)

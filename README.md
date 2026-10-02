@@ -3,7 +3,7 @@
 Margdarshak turns your budget, duration, interests and travel dates into one personalized plan: ranked
 destinations with explanations, hotels, weather, an optimized route, a day-wise itinerary and a cost estimate.
 
-> **Status:** Phase 2 of 11 (auth, data model, preferences). See [docs/architecture.md](docs/architecture.md) for the architecture
+> **Status:** Phase 3 of 11 (auth, data model, preferences, seeded catalogue). See [docs/architecture.md](docs/architecture.md) for the architecture
 > and phase plan.
 
 ## Tech stack
@@ -52,9 +52,13 @@ npm run dev     # http://localhost:5173
 cd backend && pytest
 ```
 
-## Database migrations
+## Database migrations & seed data
 
-The backend container runs `alembic upgrade head` on start. After changing models:
+The backend container runs `alembic upgrade head` and `python ../database/seed.py` on start. The seed only
+inserts missing rows; use `docker compose exec backend python ../database/seed.py --update` to reapply dataset
+changes. See [ml/datasets/README.md](ml/datasets/README.md) for what the data is and how costs are estimated.
+
+After changing models:
 
 ```bash
 cd backend
@@ -71,7 +75,7 @@ as such. Never commit `.env`.
 ```
 backend/    FastAPI app (app/), tests/
 frontend/   React app (src/), nginx.conf for the Docker build
-ml/         embedding + FAISS build scripts, datasets        (Phase 4)
-database/   migrations/ (Alembic, run from backend/), seed script (Phase 3)
+ml/         datasets/ (destinations, places); embedding + FAISS scripts (Phase 4)
+database/   migrations/ (Alembic, run from backend/), seed.py
 docs/       architecture, api, ml, database, viva notes
 ```
