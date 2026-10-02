@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.database import SessionLocal, get_db
-from app.routers import auth, catalog, external, recommendations, reviews, trips, users
+from app.routers import admin, auth, catalog, external, recommendations, reviews, trips, users
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s [%(name)s] %(message)s")
 log = logging.getLogger("margdarshak")
@@ -50,6 +50,7 @@ app.include_router(recommendations.router)
 app.include_router(external.router)
 app.include_router(trips.router)
 app.include_router(reviews.router)
+app.include_router(admin.router)
 
 
 @app.exception_handler(SQLAlchemyError)

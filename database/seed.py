@@ -2,6 +2,10 @@
 
     python database/seed.py            # insert anything missing (safe to re-run; runs on container start)
     python database/seed.py --update   # also overwrite existing rows with dataset values
+    python database/seed.py --make-admin you@example.com   # grant admin to an existing account
+
+Admin bootstrap: if ADMIN_EMAIL is set, that account is promoted on every run; if it doesn't exist
+and ADMIN_PASSWORD is also set, it is created.
 
 Destinations and places come from hand-authored CSVs. Hotels are *generated* sample listings
 (deterministic per destination) — they are not real properties, prices or availability.
@@ -127,7 +131,8 @@ def seed(db: Session, update: bool = False) -> dict[str, int]:
 
     counts = {"destinations": 0, "places": 0, "hotels": 0}
     by_name = {d.name: d for d in db.scalars(select(Destination))}
-    for row in load_destinations():
+    dataset = load_destinations()
+    for row in dataset:
         counts["destinations"] += _upsert(db, Destination, by_name.get(row["name"]), row, update)
     db.flush()
     by_name = {d.name: d for d in db.scalars(select(Destination))}
@@ -144,7 +149,8 @@ def seed(db: Session, update: bool = False) -> dict[str, int]:
     for p in load_places():
         if p["kind"] == "attraction":
             landmarks.setdefault(p["destination"], []).append((p["name"], p["latitude"], p["longitude"]))
-    for name, dest in by_name.items():
+    for name in (r["name"] for r in dataset):  # admin-created destinations never get sample hotels
+        dest = by_name[name]
         for h in generate_hotels({"name": name, "latitude": dest.latitude, "longitude": dest.longitude,
                                   "average_hotel_cost": dest.average_hotel_cost}, landmarks.get(name, [])):
             values = {**h, "destination_id": dest.id}
@@ -154,17 +160,45 @@ def seed(db: Session, update: bool = False) -> dict[str, int]:
     return counts
 
 
+def ensure_admin(db: Session, email: str | None, password: str | None = None) -> str | None:
+    from app.models import User
+    from app.security import hash_password
+
+    if not email:
+        return None
+    email = email.strip().lower()
+    user = db.scalar(select(User).where(User.email == email))
+    if user is None:
+        if not password:
+            return f"No account for {email}; register it first or set ADMIN_PASSWORD"
+        if len(password) < 8:
+            return "ADMIN_PASSWORD must be at least 8 characters"
+        user = User(name="Administrator", email=email, password_hash=hash_password(password))
+        db.add(user)
+    user.is_admin = True
+    db.commit()
+    return f"Admin access granted to {email}"
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--update", action="store_true", help="overwrite existing rows with dataset values")
+    parser.add_argument("--make-admin", metavar="EMAIL", help="grant admin to an existing account and exit")
     args = parser.parse_args()
+
+    import os
 
     from app.database import SessionLocal
 
     with SessionLocal() as db:
+        if args.make_admin:
+            print(ensure_admin(db, args.make_admin))
+            return
         counts = seed(db, update=args.update)
-    verb = "inserted/updated" if args.update else "inserted"
-    print("Seed complete — " + ", ".join(f"{v} {k} {verb}" for k, v in counts.items()))
+        verb = "inserted/updated" if args.update else "inserted"
+        print("Seed complete — " + ", ".join(f"{v} {k} {verb}" for k, v in counts.items()))
+        if msg := ensure_admin(db, os.getenv("ADMIN_EMAIL"), os.getenv("ADMIN_PASSWORD")):
+            print(msg)
 
 
 if __name__ == "__main__":

@@ -47,7 +47,7 @@ preferences → RecommendationEngine (FAISS candidates → weighted score + reas
 | 6 | Budget & routes | `BudgetCalculator` (min/avg/max, intercity, assumptions), `RouteOptimizer` (NN + 2-opt + Or-opt), `POST /api/routes/optimize` | ✅ done |
 | 7 | Itinerary | `ItineraryGenerator` (interest scoring, weather swaps, excursion days, time-of-day rules, carry-over), hotel ranking, `/api/trips/*` incl. regenerate/share/duplicate/complete, dashboard API | ✅ done |
 | 8 | Product UI | Landing, dashboard, plan-trip wizard, results, trip/itinerary pages, saved trips, reviews | |
-| 9 | Admin | Role-protected CRUD for destinations/hotels, review moderation | |
+| 9 | Admin | `/api/admin/*`: destinations + hotels CRUD (recommender cache invalidated), users, review moderation; admin bootstrap via seed | ✅ backend |
 | 10 | Hardening | Tests across engines/APIs, rate limiting, indexes, pagination | |
 | 11 | Ship | GitHub Actions CI, full README + docs (api/ml/database/viva) | |
 
