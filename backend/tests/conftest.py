@@ -2,6 +2,11 @@ import os
 
 os.environ.setdefault("DATABASE_URL", "sqlite://")
 os.environ.setdefault("JWT_SECRET", "test-secret-" + "x" * 32)
+# Fast, deterministic TF-IDF path by default; RUN_ST_TESTS=1 exercises the transformer model.
+os.environ.setdefault("DISABLE_SENTENCE_TRANSFORMERS", "1")
+os.environ.setdefault("ML_ARTIFACTS_DIR", os.path.join(os.path.dirname(__file__), ".no-artifacts"))
+for key in ("OPENWEATHER_API_KEY", "GOOGLE_MAPS_API_KEY", "GOOGLE_PLACES_API_KEY"):
+    os.environ[key] = ""  # tests must never call real external APIs
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402

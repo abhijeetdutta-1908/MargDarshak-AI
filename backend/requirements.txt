@@ -7,7 +7,10 @@ email-validator==2.3.0
 alembic==1.16.5
 bcrypt==5.0.0
 PyJWT==2.10.1
-
-# tests
-pytest==8.4.2
 httpx==0.28.1
+numpy==2.5.3
+scikit-learn==1.9.1
+
+# tests / lint
+pytest==8.4.2
+ruff==0.14.0

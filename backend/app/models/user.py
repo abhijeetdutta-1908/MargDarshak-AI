@@ -1,9 +1,14 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, ForeignKey, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base, JSONType
+
+if TYPE_CHECKING:
+    from app.models.catalog import Review
+    from app.models.trip import Booking, SavedTrip, TravelHistory
 
 
 class User(Base):

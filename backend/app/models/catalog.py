@@ -1,11 +1,16 @@
 """Travel catalogue: destinations and the hotels, places and reviews attached to them."""
 
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, CheckConstraint, Float, ForeignKey, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base, JSONType
+
+if TYPE_CHECKING:
+    from app.models.trip import SavedTrip
+    from app.models.user import User
 
 
 class Destination(Base):

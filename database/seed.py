@@ -80,7 +80,7 @@ def km(a_lat: float, a_lng: float, b_lat: float, b_lng: float) -> float:
 
 
 def _address(city: str, lat: float, lng: float, landmarks: list[tuple[str, float, float]]) -> str:
-    near = min(landmarks, key=lambda l: km(lat, lng, l[1], l[2]), default=None)
+    near = min(landmarks, key=lambda lm: km(lat, lng, lm[1], lm[2]), default=None)
     if near and km(lat, lng, near[1], near[2]) <= 3:
         return f"Near {near[0]}, {city}"
     return f"Central {city}"

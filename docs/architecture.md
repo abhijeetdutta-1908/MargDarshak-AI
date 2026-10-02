@@ -42,9 +42,9 @@ preferences → RecommendationEngine (FAISS candidates → weighted score + reas
 | 1 | Setup | Repo layout, FastAPI + React + Postgres, Docker Compose, health check end to end | ✅ done |
 | 2 | Auth & models | All SQLAlchemy models, Alembic migrations, register/login/JWT/me, preferences API, login/register/profile UI | ✅ done |
 | 3 | Data | 36 destinations, 153 attractions, 68 restaurants, 72 activities/shopping, 180 sample hotels; idempotent seed; destinations + hotels API | ✅ done |
-| 4 | Recommendations | Sentence-Transformer embeddings (TF-IDF fallback), FAISS index, weighted scoring + reasons | |
-| 5 | External APIs | Weather, Maps, Places services with cache, timeouts, fallbacks | |
-| 6 | Budget & routes | `BudgetCalculator`, `RouteOptimizer` | |
+| 4 | Recommendations | Sentence-Transformer embeddings (TF-IDF fallback), FAISS index (NumPy fallback), 9-component weighted score, reasons/warnings, `POST /api/recommendations` | ✅ done |
+| 5 | External APIs | OpenWeather, Google Places (New), Google Routes matrix; TTL cache, timeouts, error mapping, labelled fallbacks; photo proxy | ✅ done |
+| 6 | Budget & routes | `BudgetCalculator` (min/avg/max, intercity, assumptions), `RouteOptimizer` (NN + 2-opt + Or-opt), `POST /api/routes/optimize` | ✅ done |
 | 7 | Itinerary | `ItineraryGenerator`, weather-aware, `/api/trips/generate` | |
 | 8 | Product UI | Landing, dashboard, plan-trip wizard, results, trip/itinerary pages, saved trips, reviews | |
 | 9 | Admin | Role-protected CRUD for destinations/hotels, review moderation | |

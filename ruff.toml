@@ -1,0 +1,22 @@
+line-length = 120
+target-version = "py312"
+src = ["backend", "database", "ml"]
+
+[lint]
+select = ["E", "F", "I", "B", "UP", "S"]
+ignore = [
+  "B008",   # FastAPI Depends() in defaults is the documented pattern
+  "S101",   # assert is fine in tests and self-checks
+  "S311",   # random is used for deterministic sample data, not security
+  "E501",   # long string literals in data/messages
+  "B904",   # `from None` used deliberately where shown
+]
+
+[lint.per-file-ignores]
+"backend/tests/*" = ["S105", "S106"]
+"database/migrations/**" = ["E", "F", "I", "UP"]
+"ml/*.py" = ["I001", "E402"]  # _common must be imported first: it sets sys.path
+"database/seed.py" = ["E402"]  # sys.path is set before app imports
+
+[lint.isort]
+known-first-party = ["app", "seed", "_common"]
