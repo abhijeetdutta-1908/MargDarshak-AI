@@ -2,6 +2,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import String, cast, func, or_, select
 from sqlalchemy.orm import Session
 
+from app.ml.hotels import HotelCandidate, rank_hotels
 from app.models import Destination, Hotel, Place
 
 
@@ -53,12 +54,30 @@ def destination_detail(db: Session, destination_id: int) -> dict:
 
 
 def list_hotels(
-    db: Session, destination_id: int, *, tier: str | None, max_price: int | None
-) -> list[Hotel]:
+    db: Session, destination_id: int, *, tier: str | None, max_price: int | None,
+    preferred_tier: str | None = None, nightly_budget: int | None = None,
+) -> list[dict]:
+    """Cheapest first, or ranked (score + reasons) when a preferred tier or nightly budget is given."""
     get_destination(db, destination_id)
     stmt = select(Hotel).where(Hotel.destination_id == destination_id)
     if tier:
         stmt = stmt.where(Hotel.tier == tier)
     if max_price is not None:
         stmt = stmt.where(Hotel.price_per_night <= max_price)
-    return list(db.scalars(stmt.order_by(Hotel.price_per_night)))
+    hotels = list(db.scalars(stmt.order_by(Hotel.price_per_night)))
+    rows = [{c.key: getattr(h, c.key) for c in Hotel.__table__.columns} for h in hotels]
+    if not (preferred_tier or nightly_budget):
+        return rows
+    attractions = db.execute(select(Place.latitude, Place.longitude)
+                             .where(Place.destination_id == destination_id, Place.kind == "attraction")).all()
+    cands = [HotelCandidate(h.id, h.name, h.tier, h.rating, h.price_per_night, h.latitude, h.longitude) for h in hotels]
+    by_id = {r["id"]: r for r in rows}
+    return [{**by_id[r["hotel"].id], "score": r["score"], "reasons": r["reasons"]}
+            for r in rank_hotels(cands, preferred_tier, nightly_budget, [tuple(a) for a in attractions])]
+
+
+def hotel_detail(db: Session, hotel_id: int) -> dict:
+    h = db.get(Hotel, hotel_id)
+    if h is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Hotel not found")
+    return {**{c.key: getattr(h, c.key) for c in Hotel.__table__.columns}, "destination_name": h.destination.name}

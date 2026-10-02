@@ -5,37 +5,16 @@ import logging
 import httpx
 
 from app.config import get_settings
-from app.ml.recommendation import haversine_km
+from app.ml.route import Point, estimate_matrix
 from app.services.http import ExternalAPIError, request_json
 from app.utils.cache import TTLCache
 
 log = logging.getLogger("margdarshak")
 MATRIX_URL = "https://routes.googleapis.com/distanceMatrix/v2:computeRouteMatrix"
-TRAVEL_MODE = {"public": "TRANSIT", "car": "DRIVE", "taxi": "DRIVE", "bike": "TWO_WHEELER", "mixed": "DRIVE", "walk": "WALK"}
-# Average door-to-door speeds inside a destination, km/h (estimate mode).
-CITY_SPEED = {"walk": 4.5, "public": 16, "bike": 24, "car": 26, "taxi": 26, "mixed": 22}
-ROAD_FACTOR = 1.3  # roads are longer than straight lines
-LEG_OVERHEAD_MIN = 5  # parking, waiting, finding the entrance
 MAX_GOOGLE_POINTS = 10
+TRAVEL_MODE = {"public": "TRANSIT", "car": "DRIVE", "taxi": "DRIVE", "bike": "TWO_WHEELER", "mixed": "DRIVE", "walk": "WALK"}
 
 _cache = TTLCache(6 * 3600)
-Point = tuple[float, float]
-
-
-def estimate_matrix(points: list[Point], mode: str) -> tuple[list[list[float]], list[list[float]]]:
-    speed = CITY_SPEED.get(mode, 22)
-    n = len(points)
-    km = [[0.0] * n for _ in range(n)]
-    minutes = [[0.0] * n for _ in range(n)]
-    for i in range(n):
-        for j in range(n):
-            if i != j:
-                d = haversine_km(points[i], points[j]) * ROAD_FACTOR
-                # walking is faster than waiting for transport over very short hops
-                spd = CITY_SPEED["walk"] if d < 0.8 else speed
-                km[i][j] = round(d, 2)
-                minutes[i][j] = round(d / spd * 60 + (0 if d < 0.8 else LEG_OVERHEAD_MIN), 1)
-    return km, minutes
 
 
 async def google_matrix(client: httpx.AsyncClient, key: str, points: list[Point], mode: str):

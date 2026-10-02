@@ -56,6 +56,13 @@ class HotelOut(BaseModel):
     latitude: float
     longitude: float
     image_url: str | None
+    score: float | None = None
+    reasons: list[str] = []
+
+
+class HotelDetail(HotelOut):
+    destination_name: str
+    note: str = HOTEL_NOTE
 
 
 class HotelList(BaseModel):

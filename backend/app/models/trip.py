@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Date, Float, ForeignKey, String, Text, func
+from sqlalchemy import Boolean, Date, Float, ForeignKey, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base, JSONType
@@ -28,6 +28,11 @@ class SavedTrip(Base):
     weather: Mapped[dict] = mapped_column(JSONType, default=dict)
     route: Mapped[dict] = mapped_column(JSONType, default=dict)
     recommendations: Mapped[list] = mapped_column(JSONType, default=list)
+    explanations: Mapped[list] = mapped_column(JSONType, default=list, server_default="[]")  # weather / scheduling decisions
+    unscheduled: Mapped[list] = mapped_column(JSONType, default=list, server_default="[]")
+    variation: Mapped[int] = mapped_column(default=0, server_default="0")  # bumped by "regenerate"
+    is_saved: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false", index=True)
+    is_completed: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
     share_token: Mapped[str | None] = mapped_column(String(64), unique=True)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
@@ -47,7 +52,12 @@ class TripDay(Base):
     trip_id: Mapped[int] = mapped_column(ForeignKey("saved_trips.id", ondelete="CASCADE"), index=True)
     day_number: Mapped[int]
     date: Mapped[date | None] = mapped_column(Date)
+    title: Mapped[str | None] = mapped_column(String(255))
     weather_note: Mapped[str | None] = mapped_column(String(255))
+    rain_likely: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    weather_source: Mapped[str | None] = mapped_column(String(20))
+    total_distance_km: Mapped[float] = mapped_column(Float, default=0, server_default="0")
+    total_travel_minutes: Mapped[int] = mapped_column(default=0, server_default="0")
 
     trip: Mapped[SavedTrip] = relationship(back_populates="days")
     items: Mapped[list["ItineraryItem"]] = relationship(
@@ -73,6 +83,7 @@ class ItineraryItem(Base):
     latitude: Mapped[float | None] = mapped_column(Float)
     longitude: Mapped[float | None] = mapped_column(Float)
     duration_minutes: Mapped[int] = mapped_column(default=60)
+    travel_minutes: Mapped[int] = mapped_column(default=0, server_default="0")  # from the previous stop
 
     day: Mapped[TripDay] = relationship(back_populates="items")
 

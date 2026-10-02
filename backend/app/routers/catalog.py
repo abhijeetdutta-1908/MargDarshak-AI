@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.schemas.catalog import DestinationDetail, DestinationPage, HotelList
+from app.schemas.catalog import DestinationDetail, DestinationPage, HotelDetail, HotelList
 from app.schemas.preferences import DestinationType, HotelTier
 from app.services import catalog as svc
 
@@ -39,12 +39,21 @@ def get_destination(destination_id: int, db: Session = Depends(get_db)):
     return svc.destination_detail(db, destination_id)
 
 
+@router.get("/api/hotels/item/{hotel_id}", response_model=HotelDetail, tags=["hotels"])
+def get_hotel(hotel_id: int, db: Session = Depends(get_db)):
+    return svc.hotel_detail(db, hotel_id)
+
+
 @router.get("/api/hotels/{destination_id}", response_model=HotelList, tags=["hotels"])
 def list_hotels(
     destination_id: int,
-    tier: HotelTier | None = None,
+    tier: HotelTier | None = Query(None, description="Only this tier"),
     max_price: int | None = Query(None, ge=0),
+    preferred_tier: HotelTier | None = Query(None, description="Rank with this tier preferred"),
+    nightly_budget: int | None = Query(None, ge=0, description="Rank by fit to this nightly budget"),
     db: Session = Depends(get_db),
 ):
-    """Hotels at a destination, cheapest first. Seeded sample data (see `note`)."""
-    return HotelList(items=svc.list_hotels(db, destination_id, tier=tier, max_price=max_price))
+    """Hotels at a destination: cheapest first, or ranked by budget, rating, tier and distance to sights
+    when `preferred_tier` / `nightly_budget` is given. Seeded sample data (see `note`)."""
+    return HotelList(items=svc.list_hotels(db, destination_id, tier=tier, max_price=max_price,
+                                           preferred_tier=preferred_tier, nightly_budget=nightly_budget))
