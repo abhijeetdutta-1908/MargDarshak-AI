@@ -3,7 +3,7 @@
 Margdarshak turns your budget, duration, interests and travel dates into one personalized plan: ranked
 destinations with explanations, hotels, weather, an optimized route, a day-wise itinerary and a cost estimate.
 
-> **Status:** Phase 1 of 11 (foundation). See [docs/architecture.md](docs/architecture.md) for the architecture
+> **Status:** Phase 2 of 11 (auth, data model, preferences). See [docs/architecture.md](docs/architecture.md) for the architecture
 > and phase plan.
 
 ## Tech stack
@@ -34,7 +34,10 @@ Run Postgres only: `docker compose up postgres -d`, then:
 cd backend
 python -m venv .venv && .venv/Scripts/activate   # Windows; use .venv/bin/activate on macOS/Linux
 pip install -r requirements.txt
-set DATABASE_URL=postgresql+psycopg://margdarshak:<password>@localhost:5432/margdarshak
+# Compose publishes Postgres on host port 5433 (POSTGRES_HOST_PORT) to avoid clashing with a local install.
+set DATABASE_URL=postgresql+psycopg://margdarshak:<password>@localhost:5433/margdarshak
+set JWT_SECRET=<same value as .env>
+alembic upgrade head
 uvicorn app.main:app --reload
 
 # frontend (new terminal) — dev server proxies /api to :8000
@@ -49,6 +52,15 @@ npm run dev     # http://localhost:5173
 cd backend && pytest
 ```
 
+## Database migrations
+
+The backend container runs `alembic upgrade head` on start. After changing models:
+
+```bash
+cd backend
+alembic revision --autogenerate -m "describe change"
+```
+
 ## Environment variables
 
 See [.env.example](.env.example). API keys are optional; without them the app uses seeded data and labels it
@@ -60,6 +72,6 @@ as such. Never commit `.env`.
 backend/    FastAPI app (app/), tests/
 frontend/   React app (src/), nginx.conf for the Docker build
 ml/         embedding + FAISS build scripts, datasets        (Phase 4)
-database/   seed script, migrations                          (Phases 2–3)
+database/   migrations/ (Alembic, run from backend/), seed script (Phase 3)
 docs/       architecture, api, ml, database, viva notes
 ```

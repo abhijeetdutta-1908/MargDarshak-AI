@@ -31,7 +31,7 @@ preferences → RecommendationEngine (FAISS candidates → weighted score + reas
 
 | Service  | Image                | Port (host) | Notes                                  |
 |----------|----------------------|-------------|----------------------------------------|
-| postgres | postgres:16-alpine   | 5432        | volume `pgdata`, healthcheck gates backend |
+| postgres | postgres:16-alpine   | 5433        | volume `pgdata`, healthcheck gates backend |
 | backend  | python:3.12-slim     | 8000        | uvicorn, `/docs`, `/redoc`             |
 | frontend | nginx:1.27-alpine    | 3000        | static build, proxies `/api/` → backend |
 
@@ -40,7 +40,7 @@ preferences → RecommendationEngine (FAISS candidates → weighted score + reas
 | # | Phase | Deliverable | Status |
 |---|-------|-------------|--------|
 | 1 | Setup | Repo layout, FastAPI + React + Postgres, Docker Compose, health check end to end | ✅ done |
-| 2 | Auth & models | All SQLAlchemy models, Alembic migrations, register/login/JWT/me, preferences API | |
+| 2 | Auth & models | All SQLAlchemy models, Alembic migrations, register/login/JWT/me, preferences API, login/register/profile UI | ✅ done |
 | 3 | Data | Seed script: 30+ destinations, 100+ hotels, 100+ attractions, 50+ restaurants | |
 | 4 | Recommendations | Sentence-Transformer embeddings (TF-IDF fallback), FAISS index, weighted scoring + reasons | |
 | 5 | External APIs | Weather, Maps, Places services with cache, timeouts, fallbacks | |
