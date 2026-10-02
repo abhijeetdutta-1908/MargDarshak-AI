@@ -107,3 +107,16 @@ def test_time_of_day_rules():
     after = boat_day["items"][boat_day["items"].index(boat) + 1]
     assert after["title"] == "Breakfast"
     assert out["unscheduled"] == []
+
+
+def test_seasonal_closures_are_respected():
+    from app.ml.itinerary import closed_months
+
+    assert closed_months({"closed:11-4"}) == {11, 12, 1, 2, 3, 4}
+    assert closed_months({"closed:2-3", "snow"}) == {2, 3}
+    winter = build("Manali", days=4, interests=("adventure", "photography"), start=date(2026, 11, 10))
+    titles = {i["title"] for d in winter["days"] for i in d["items"]}
+    assert "Rohtang Pass" not in titles
+    assert any("usually closed" in e and "Rohtang Pass" in e for e in winter["explanations"])
+    summer = build("Manali", days=4, interests=("adventure", "photography"), start=date(2027, 6, 1))
+    assert "Rohtang Pass" in {i["title"] for d in summer["days"] for i in d["items"]}

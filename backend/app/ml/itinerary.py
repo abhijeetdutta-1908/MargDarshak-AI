@@ -81,6 +81,22 @@ class DaySlot:
         return sum(p.duration_minutes + 25 for p in self.places)  # + rough travel per stop
 
 
+def closed_months(tags: set[str]) -> set[int]:
+    """Parse seasonal closure tags like "closed:11-4" (Nov through Apr, wrapping the year)."""
+    months: set[int] = set()
+    for tag in tags:
+        if tag.startswith("closed:"):
+            a, _, b = tag[7:].partition("-")
+            start, end = int(a), int(b or a)
+            m = start
+            while True:
+                months.add(m)
+                if m == end:
+                    break
+                m = m % 12 + 1
+    return months
+
+
 def hhmm(m: int) -> str:
     m = max(0, min(m, 23 * 60 + 59))
     return f"{m // 60:02d}:{m % 60:02d}"
@@ -102,6 +118,11 @@ class ItineraryGenerator:
         self.variation = variation
         self.hotel = hotel or HotelStay(None, f"Stay in {destination}", *center)
         self.attractions = [p for p in places if p.kind in ("attraction", "activity", "shopping")]
+        self.closed: list[str] = []
+        if start_date:  # drop places that are seasonally closed on the trip dates
+            trip_months = {(start_date + timedelta(days=i)).month for i in range(self.duration)}
+            self.closed = [p.name for p in self.attractions if closed_months(p.tags) & trip_months]
+            self.attractions = [p for p in self.attractions if p.name not in self.closed]
         self.restaurants = [p for p in places if p.kind == "restaurant"]
         weather = weather or []
         self.days = [self._slot(i + 1, weather[i] if i < len(weather) else DayWeather()) for i in range(self.duration)]
@@ -412,6 +433,8 @@ class ItineraryGenerator:
             days.append(self.generate_day_plan(d))
             self._dropped = [p for p in carry if p not in fits] + self._dropped  # try again tomorrow
         self.unscheduled += self._dropped
+        if self.closed:
+            self.explanations.append(f"Left out because it's usually closed on your dates: {', '.join(self.closed)}.")
         if self.unscheduled:
             names = list(dict.fromkeys(p.name for p in self.unscheduled))
             self.explanations.append(f"Not enough time for: {', '.join(names)}. Consider an extra day.")

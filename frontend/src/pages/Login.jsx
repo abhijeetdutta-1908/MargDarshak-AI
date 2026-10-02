@@ -10,7 +10,7 @@ export default function Login() {
   const { user, login } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const from = location.state?.from || '/profile'
+  const from = location.state?.from || '/dashboard'
   const expired = new URLSearchParams(location.search).has('expired')
   const [form, setForm] = useState({ email: '', password: '' })
   const [busy, setBusy] = useState(false)
