@@ -1,9 +1,14 @@
+from logging.config import fileConfig
+
 from alembic import context
 
 import app.models  # noqa: F401  register tables on Base.metadata
 from app.database import Base, engine
 
 target_metadata = Base.metadata
+
+if context.config.config_file_name:
+    fileConfig(context.config.config_file_name, disable_existing_loggers=False)
 
 
 def run_migrations_offline() -> None:

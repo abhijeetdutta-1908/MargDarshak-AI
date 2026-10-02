@@ -16,8 +16,13 @@ from sqlalchemy.orm import sessionmaker  # noqa: E402
 from sqlalchemy.pool import StaticPool  # noqa: E402
 
 import app.models  # noqa: E402,F401  register tables
+from app.config import get_settings  # noqa: E402
 from app.database import Base, get_db  # noqa: E402
 from app.main import app  # noqa: E402
+
+# Belt and braces: even if a real .env is picked up, tests never use real API keys.
+for _attr in ("openweather_api_key", "google_maps_api_key", "google_places_api_key", "google_maps_browser_key"):
+    setattr(get_settings(), _attr, None)
 
 # Set TEST_DATABASE_URL (e.g. a throwaway Postgres DB) to run the suite against PostgreSQL.
 TEST_DB = os.getenv("TEST_DATABASE_URL")
