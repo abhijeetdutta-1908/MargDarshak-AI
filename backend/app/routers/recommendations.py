@@ -4,11 +4,12 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.schemas.recommendation import RecommendationRequest, RecommendationResponse
 from app.services import recommendations as svc
+from app.utils.ratelimit import recommend_limit
 
 router = APIRouter(tags=["recommendations"])
 
 
-@router.post("/api/recommendations", response_model=RecommendationResponse)
+@router.post("/api/recommendations", response_model=RecommendationResponse, dependencies=[Depends(recommend_limit)])
 def recommend(req: RecommendationRequest, db: Session = Depends(get_db)):
     """Rank destinations for the given preferences.
 

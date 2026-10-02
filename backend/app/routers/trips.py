@@ -8,11 +8,13 @@ from app.schemas.trip import ShareResponse, TripDayOut, TripGenerateRequest, Tri
 from app.security import get_current_user
 from app.services import trips as svc
 from app.services.http import get_http
+from app.utils.ratelimit import generate_limit
 
 router = APIRouter(tags=["trips"])
 
 
-@router.post("/api/trips/generate", response_model=TripOut, status_code=status.HTTP_201_CREATED)
+@router.post("/api/trips/generate", response_model=TripOut, status_code=status.HTTP_201_CREATED,
+             dependencies=[Depends(generate_limit)])
 async def generate_trip(req: TripGenerateRequest, user: User = Depends(get_current_user),
                         db: Session = Depends(get_db), http: httpx.AsyncClient = Depends(get_http)):
     """Full pipeline: recommend, pick destination, weather, places, hotel, route, itinerary, budget, save."""
@@ -70,7 +72,7 @@ def get_itinerary(trip_id: int, user: User = Depends(get_current_user), db: Sess
     return svc.get_owned(db, user, trip_id).days
 
 
-@router.post("/api/trips/{trip_id}/itinerary/regenerate", response_model=TripOut)
+@router.post("/api/trips/{trip_id}/itinerary/regenerate", response_model=TripOut, dependencies=[Depends(generate_limit)])
 async def regenerate_itinerary(trip_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db),
                                http: httpx.AsyncClient = Depends(get_http)):
     """Rebuild the day plan with fresh weather and alternative picks; keeps destination and hotel."""

@@ -48,7 +48,7 @@ preferences → RecommendationEngine (FAISS candidates → weighted score + reas
 | 7 | Itinerary | `ItineraryGenerator` (interest scoring, weather swaps, excursion days, time-of-day rules, carry-over), hotel ranking, `/api/trips/*` incl. regenerate/share/duplicate/complete, dashboard API | ✅ done |
 | 8 | Product UI | Landing, dashboard, plan trip, explained recommendations, destination/hotel/trip/itinerary pages, maps (Google or OSM), budget charts, saved trips, sharing, reviews; responsive; 21 frontend tests | ✅ done |
 | 9 | Admin | `/api/admin/*`: destinations + hotels CRUD (recommender cache invalidated), users, review moderation; admin bootstrap via seed | ✅ done |
-| 10 | Hardening | Tests across engines/APIs, rate limiting, indexes, pagination | |
+| 10 | Hardening | Rate limiting, security headers + CSP, safe 500s, token tampering tests, suite also runs on PostgreSQL (85 backend tests) | ✅ done |
 | 11 | Ship | GitHub Actions CI, full README + docs (api/ml/database/viva) | |
 
 Each phase ends with: code runs, tests pass, summary of what was built.

@@ -53,6 +53,25 @@ app.include_router(reviews.router)
 app.include_router(admin.router)
 
 
+@app.middleware("http")
+async def security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("X-Frame-Options", "DENY")
+    response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    response.headers.setdefault("Permissions-Policy", "geolocation=(), camera=(), microphone=()")
+    if request.url.path.startswith("/api/"):
+        response.headers.setdefault("Cache-Control", "no-store")
+    return response
+
+
+@app.exception_handler(Exception)
+def unhandled_error(request: Request, exc: Exception):
+    # Never leak stack traces to clients; the traceback goes to the server log.
+    log.exception("Unhandled error on %s %s", request.method, request.url.path)
+    return JSONResponse(status_code=500, content={"detail": "Something went wrong on our side. Please try again."})
+
+
 @app.exception_handler(SQLAlchemyError)
 def db_error(request: Request, exc: SQLAlchemyError):
     log.exception("Database error on %s %s", request.method, request.url.path)

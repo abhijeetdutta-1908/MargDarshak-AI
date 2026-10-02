@@ -23,6 +23,8 @@ class Settings(BaseSettings):
     weather_cache_seconds: int = 1800
     places_cache_seconds: int = 6 * 3600
 
+    rate_limit_enabled: bool = True
+
     # JSON object overriding RecommendationEngine weights, e.g. {"budget": 0.3}
     recommendation_weights: dict[str, float] | None = None
 

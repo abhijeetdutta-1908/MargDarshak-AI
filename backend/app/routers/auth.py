@@ -6,18 +6,20 @@ from app.models import User
 from app.schemas.user import LoginRequest, RegisterRequest, TokenResponse, UserOut
 from app.security import create_access_token, get_current_user
 from app.services import users as svc
+from app.utils.ratelimit import login_limit, register_limit
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
-@router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED,
+             dependencies=[Depends(register_limit)])
 def register(data: RegisterRequest, db: Session = Depends(get_db)):
     """Create an account and return an access token so the user is signed in immediately."""
     user = svc.register(db, data)
     return TokenResponse(access_token=create_access_token(user), user=user)
 
 
-@router.post("/login", response_model=TokenResponse)
+@router.post("/login", response_model=TokenResponse, dependencies=[Depends(login_limit)])
 def login(data: LoginRequest, db: Session = Depends(get_db)):
     user = svc.authenticate(db, data.email, data.password)
     return TokenResponse(access_token=create_access_token(user), user=user)
