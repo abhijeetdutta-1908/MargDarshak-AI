@@ -31,6 +31,8 @@ class DestinationDetail(DestinationOut):
     attraction_count: int
     restaurant_count: int
     hotel_count: int
+    average_rating: float | None
+    review_count: int
     cost_note: str = COST_NOTE
 
 

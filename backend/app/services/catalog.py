@@ -45,7 +45,12 @@ def destination_detail(db: Session, destination_id: int) -> dict:
         ).all()
     )
     hotels = db.scalar(select(func.count()).where(Hotel.destination_id == dest.id))
+    from app.services.reviews import rating_summary
+
+    avg, count, _ = rating_summary(db, dest.id)
     return {
+        "average_rating": avg,
+        "review_count": count,
         **{c.key: getattr(dest, c.key) for c in Destination.__table__.columns},
         "attraction_count": kinds.get("attraction", 0),
         "restaurant_count": kinds.get("restaurant", 0),
