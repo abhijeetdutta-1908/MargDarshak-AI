@@ -41,6 +41,8 @@ React SPA (Vite, Tailwind)  ──►  nginx  ──/api──►  FastAPI
                                                     └──► Sentence Transformers + FAISS (baked into the image)
 ```
 
+**New here? Start with [docs/getting-started.md](docs/getting-started.md).**
+
 More detail: [docs/architecture.md](docs/architecture.md) · [docs/ml.md](docs/ml.md) · [docs/database.md](docs/database.md) ·
 [docs/api.md](docs/api.md) · viva prep: [docs/viva.md](docs/viva.md)
 
