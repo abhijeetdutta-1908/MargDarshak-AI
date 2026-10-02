@@ -1,0 +1,27 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Node
+node_modules/
+dist/
+coverage/
+
+# ML artifacts (rebuilt by ml/ scripts)
+ml/artifacts/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
